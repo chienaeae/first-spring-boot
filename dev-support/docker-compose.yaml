@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: my_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dev_todo_db
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: my_password
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - my_net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      retries: 5
+      timeout: 10s
+
+networks:
+  my_net:
+    driver: bridge
