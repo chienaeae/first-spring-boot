@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class Todo {
+public class TodoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,18 +18,11 @@ public class Todo {
     private String title;
     private String description;
 
-    protected Todo() {}
+    protected TodoEntity() {}
 
-    public Todo (String title, String description) {
+    public TodoEntity(String title, String description) {
         this.title = title;
         this.description = description;
     }
 
-    @Override
-    public String toString() {
-        return String.format(
-                "Todo[id=%d, title='%s', description='%s']",
-                id, title, description
-        );
-    }
 }

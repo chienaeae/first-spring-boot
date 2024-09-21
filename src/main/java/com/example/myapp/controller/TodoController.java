@@ -1,9 +1,10 @@
 package com.example.myapp.controller;
 
-import com.example.myapp.dto.TodoRequest;
-import com.example.myapp.entity.Todo;
+import com.example.myapp.dto.request.TodoCreate;
+import com.example.myapp.model.Todo;
 import com.example.myapp.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,11 +21,9 @@ public class TodoController {
     private TodoService todoService;
 
     @PostMapping("")
-    public @ResponseBody String addTodo(@RequestBody TodoRequest todoRequest) {
-        Optional<Todo> todo = todoService.createTodo(todoRequest);
-        if(todo.isPresent()) {
-            return "Todo created with id: " + todo.get().getId();
-        }
-        return "Failed to create todo";
+    public @ResponseBody ResponseEntity<Todo> addTodo(@RequestBody TodoCreate body) {
+        Optional<Todo> todo = todoService.createTodo(body);
+        return todo.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 }
