@@ -6,11 +6,9 @@ import com.example.myapp.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -25,5 +23,10 @@ public class TodoController {
         Optional<Todo> todo = todoService.createTodo(body);
         return todo.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping("")
+    public @ResponseBody ResponseEntity<List<Todo>> getAllTodos() {
+        return ResponseEntity.ok(todoService.getTodos());
     }
 }
