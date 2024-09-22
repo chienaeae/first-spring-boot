@@ -3,12 +3,15 @@ package com.example.myapp.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 public class Todo {
     private Long id;
     private String title;
     private String description;
+    private LocalDateTime createdAt;
 
     public Todo() {
     }
