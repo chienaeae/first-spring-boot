@@ -1,8 +1,6 @@
 package com.example.myapp.security;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -13,9 +11,21 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
+
+
+
 
 @Component
 public class JwtUtils {
+    public enum TokenType {
+        ACCESS,
+        REFRESH
+    }
+
+    private static final String TOKEN_TYPE = "tokenType";
+
     @Value("${security.jwt.secret}")
     private String secretString;
 
@@ -33,16 +43,21 @@ public class JwtUtils {
     }
 
     public String generateJwtAccessToken(String username) {
-        return signJwtToken(username, jwtAccessTokenExpirationMs);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(TOKEN_TYPE, TokenType.ACCESS.name());
+        return signJwtToken(username, jwtAccessTokenExpirationMs, claims);
     }
 
     public String generateJwtRefreshToken(String username) {
-        return signJwtToken(username, jwtRefreshTokenExpirationMs);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(TOKEN_TYPE, TokenType.REFRESH.name());
+        return signJwtToken(username, jwtRefreshTokenExpirationMs, claims);
     }
 
-    private String signJwtToken(String username, long duration) {
+    private String signJwtToken(String username, long duration, Map<String, Object> claims) {
         return Jwts
                 .builder()
+                .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + duration))
@@ -58,9 +73,9 @@ public class JwtUtils {
                 .getPayload().getSubject();
     }
 
-    public boolean verifyJwtToken(String authToken) {
+    public boolean verifyJwtToken(String authToken, TokenType tokenType) {
         try {
-            Jwts.parser().verifyWith(key).build().parse(authToken);
+            Jwts.parser().require(TOKEN_TYPE, tokenType.name()).verifyWith(key).build().parse(authToken);
             return true;
         } catch (SignatureException e) {
             // Invalid signature
@@ -68,6 +83,8 @@ public class JwtUtils {
             // Malformed token
         } catch (ExpiredJwtException e) {
             // Token expired
+        } catch (InvalidClaimException e) {
+            // Invalid claim
         } catch (UnsupportedKeyException e) {
             // Unsupported key
         } catch (IllegalArgumentException e) {

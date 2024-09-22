@@ -22,23 +22,23 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private final AuthService authService;
+
     @Autowired
-    private AuthService authService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody @Validated AuthSignup body) {
-        try {
-            Optional<UserProfile> userProfile = authService.signup(body);
-            return userProfile.<ResponseEntity<Void>>map(profile -> ResponseEntity.created(
-                            ServletUriComponentsBuilder
-                                    .fromCurrentRequestUri()
-                                    .path("/{id}")
-                                    .buildAndExpand(profile.getUsername())
-                                    .toUri()).build())
-                    .orElseGet(() -> ResponseEntity.internalServerError().build());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        Optional<String> usernameOrNull = authService.signup(body);
+        return usernameOrNull.<ResponseEntity<Void>>map(username -> ResponseEntity.created(
+                        ServletUriComponentsBuilder
+                                .fromCurrentRequestUri()
+                                .path("/{username}")
+                                .buildAndExpand(username)
+                                .toUri()).build())
+                .orElseGet(() -> ResponseEntity.internalServerError().build());
     }
 
     @PostMapping("/login")
@@ -53,16 +53,5 @@ public class AuthController {
         return ResponseEntity.ok(userAuthenticationResult);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserProfile> me() {
-        Optional<UserProfile> userProfile = authService.getUserProfile();
-        return userProfile
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Void> handleAuthenticationException() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
 }

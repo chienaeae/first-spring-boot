@@ -5,5 +5,5 @@ import lombok.Getter;
 import lombok.Setter;
 
 public record TodoCreate (
-        @NotBlank(message = "Title is mandatory")String title, String description
+        @NotBlank(message = "This field is mandatory")String title, String description
 ) {}

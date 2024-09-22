@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record AuthLogin(
-        @NotBlank(message = "Username is mandatory") String username,
-        @NotBlank(message = "Password is mandatory") String password
+        @NotBlank(message = "This field is mandatory") String username,
+        @NotBlank(message = "This field is mandatory") String password
 ) {
 }

@@ -1,5 +1,6 @@
 package com.example.myapp.security;
 
+import com.example.myapp.exception.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,27 +26,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String requestURI = request.getRequestURI();
+        System.out.println("Request URI: " + requestURI);
         String jwtToken = getJwtTokenFromRequest(request);
 
-        if(StringUtils.hasText(jwtToken) && jwtUtils.verifyJwtToken(jwtToken)){
-            String username = jwtUtils.getUserNameFromJwtToken(jwtToken);
-
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        if (!StringUtils.hasText(jwtToken)) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        if (!jwtUtils.verifyJwtToken(jwtToken, JwtUtils.TokenType.ACCESS)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid JWT Token");
+            return;
+
+        }
+
+        String username = jwtUtils.getUserNameFromJwtToken(jwtToken);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
     }
 
-    private String getJwtTokenFromRequest(HttpServletRequest request){
+    private String getJwtTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
