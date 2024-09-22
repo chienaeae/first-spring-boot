@@ -4,5 +4,6 @@ import com.example.myapp.model.UserProfile;
 
 public record UserAuthenticationResult(
         String username,
-        String token) {
+        String accessToken,
+        String refreshToken) {
 }

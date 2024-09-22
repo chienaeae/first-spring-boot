@@ -19,8 +19,11 @@ public class JwtUtils {
     @Value("${security.jwt.secret}")
     private String secretString;
 
-    @Value("${security.jwt.expirationMs}")
-    private int jwtExpirationMs;
+    @Value("${security.jwt.accessTokenExpirationMs}")
+    private long jwtAccessTokenExpirationMs;
+
+    @Value("${security.jwt.refreshTokenExpirationMs}")
+    private long jwtRefreshTokenExpirationMs;
 
     private SecretKey key;
 
@@ -29,12 +32,20 @@ public class JwtUtils {
          key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
     }
 
-    public String signJwtToken(String username) {
+    public String generateJwtAccessToken(String username) {
+        return signJwtToken(username, jwtAccessTokenExpirationMs);
+    }
+
+    public String generateJwtRefreshToken(String username) {
+        return signJwtToken(username, jwtRefreshTokenExpirationMs);
+    }
+
+    private String signJwtToken(String username, long duration) {
         return Jwts
                 .builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .expiration(new Date(System.currentTimeMillis() + duration))
                 .signWith(key)
                 .compact();
     }

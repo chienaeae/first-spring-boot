@@ -46,7 +46,7 @@ public class AuthService {
     public Optional<UserProfile> signup(AuthSignup authSignup) throws IllegalArgumentException{
         Optional<UserEntity> repeatedUser = userRepository.findByUsername(authSignup.username());
         if(repeatedUser.isPresent()) {
-            throw new IllegalArgumentException("User already exists");
+            throw new IllegalArgumentException("Username is already taken");
         }
 
         UserEntity userEntity = new UserEntity();
@@ -58,21 +58,34 @@ public class AuthService {
                 .map(userMapper::toUserProfile);
     }
 
-    public UserAuthenticationResult authenticate(AuthLogin authLogin) throws BadCredentialsException{
+    public UserAuthenticationResult authenticate(AuthLogin authLogin) throws IllegalArgumentException {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authLogin.username(), authLogin.password())
             );
-            return new UserAuthenticationResult(authentication.getName(), jwtUtils.signJwtToken(authentication.getName()));
+            String username = authentication.getName();
+            return new UserAuthenticationResult(
+                    username,
+                    jwtUtils.generateJwtAccessToken(username),
+                    jwtUtils.generateJwtRefreshToken(username));
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username/password supplied");
+            throw new IllegalArgumentException("Invalid username/password supplied") {};
         }
     }
 
-    public Optional<UserProfile>  getUserProfile() throws IllegalStateException {
+    public UserAuthenticationResult refresh(String refreshToken) throws AuthenticationException{
+        jwtUtils.verifyJwtToken(refreshToken);
+        String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
+        return new UserAuthenticationResult(
+                username,
+                jwtUtils.generateJwtAccessToken(username),
+                jwtUtils.generateJwtRefreshToken(username));
+    }
+
+    public Optional<UserProfile>  getUserProfile() throws AuthenticationException{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(!authentication.isAuthenticated()) {
-            throw new IllegalStateException("User is not authenticated");
+            throw new AuthenticationException("User is not authenticated"){};
         }
 
         String username = authentication.getName();

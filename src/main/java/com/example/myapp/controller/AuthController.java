@@ -2,11 +2,13 @@ package com.example.myapp.controller;
 
 import com.example.myapp.dto.UserAuthenticationResult;
 import com.example.myapp.dto.request.AuthLogin;
+import com.example.myapp.dto.request.AuthRefresh;
 import com.example.myapp.dto.request.AuthSignup;
 import com.example.myapp.model.UserProfile;
 import com.example.myapp.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -41,23 +43,26 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UserAuthenticationResult> login(@RequestBody @Validated AuthLogin body) {
-        try {
-            UserAuthenticationResult userAuthenticationResult = authService.authenticate(body);
-            return ResponseEntity.ok(userAuthenticationResult);
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        UserAuthenticationResult userAuthenticationResult = authService.authenticate(body);
+        return ResponseEntity.ok(userAuthenticationResult);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<UserAuthenticationResult> refresh(@RequestBody @Validated AuthRefresh body) {
+        UserAuthenticationResult userAuthenticationResult = authService.refresh(body.refreshToken());
+        return ResponseEntity.ok(userAuthenticationResult);
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserProfile> me() {
-        try {
-            Optional<UserProfile> userProfile = authService.getUserProfile();
-            return userProfile
-                    .map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        Optional<UserProfile> userProfile = authService.getUserProfile();
+        return userProfile
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Void> handleAuthenticationException() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
