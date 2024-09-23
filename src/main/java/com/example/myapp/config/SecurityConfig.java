@@ -1,5 +1,7 @@
 package com.example.myapp.config;
 
+import com.example.myapp.model.Role;
+import com.example.myapp.model.RoleEnum;
 import com.example.myapp.security.CustomUserDetailsService;
 import com.example.myapp.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +61,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAuthority(RoleEnum.ADMIN.getName())
+                        .requestMatchers("/todo/**").hasAuthority(RoleEnum.USER.getName())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

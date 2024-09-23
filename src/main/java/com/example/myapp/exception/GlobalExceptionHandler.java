@@ -24,6 +24,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(InternalException.class)
+    public ResponseEntity<ErrorResponse> handleInternalException(InternalException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         StringBuilder errorDetails = new StringBuilder();

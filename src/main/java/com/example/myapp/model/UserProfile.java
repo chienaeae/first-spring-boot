@@ -8,6 +8,7 @@ import lombok.Setter;
 public class UserProfile {
     private Long id;
     private String username;
+    private RoleEnum role;
 
     public UserProfile() {
     }
