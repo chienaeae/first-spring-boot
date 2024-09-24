@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +40,9 @@ public class AuthService {
 
     public UserAuthenticationResult signupGuest() {
         Optional<User> newGuest = userService.createGuest();
-        if(newGuest.isEmpty()) {
-            throw new InternalException("Failed to create guest"){};
+        if (newGuest.isEmpty()) {
+            throw new InternalException("Failed to create guest") {
+            };
         }
         String username = newGuest.get().getUsername();
         return new UserAuthenticationResult(
@@ -49,21 +51,20 @@ public class AuthService {
                 jwtUtils.generateJwtRefreshToken(username));
     }
 
-    public UserAuthenticationResult signup(AuthSignup authSignup) throws InvalidInputException{
+    public UserAuthenticationResult signup(AuthSignup authSignup) throws InvalidInputException {
         boolean isUserExists = userService.checkIfUserExists(authSignup.username());
-        if(isUserExists) {
-            throw new InvalidInputException("Username is already taken"){};
+        if (isUserExists) {
+            throw new InvalidInputException("Username is already taken") {
+            };
         }
 
-        Optional<User> newUser = userService.createUser(
-                authSignup.username(),
-                passwordEncoder.encode(authSignup.password()),
-                RoleEnum.USER);
+        String encodedPassword = passwordEncoder.encode(authSignup.password());
+        User newUser = userService
+                .tryFinalizeUser(authSignup.username(), encodedPassword, RoleEnum.USER)
+                .or(() -> userService.createUser(authSignup.username(), encodedPassword, RoleEnum.USER))
+                .orElseThrow(() -> new InternalException("Failed to create user"));
 
-        if(newUser.isEmpty()) {
-            throw new InternalException("Failed to create user"){};
-        }
-        String username = newUser.get().getUsername();
+        String username = newUser.getUsername();
         return new UserAuthenticationResult(
                 username,
                 jwtUtils.generateJwtAccessToken(username),
@@ -81,13 +82,15 @@ public class AuthService {
                     jwtUtils.generateJwtAccessToken(username),
                     jwtUtils.generateJwtRefreshToken(username));
         } catch (AuthenticationException e) {
-            throw new InvalidInputException("Invalid username/password supplied") {};
+            throw new InvalidInputException("Invalid username/password supplied") {
+            };
         }
     }
 
-    public UserAuthenticationResult refresh(String refreshToken) throws AuthenticationException{
-        if(!jwtUtils.verifyJwtToken(refreshToken, JwtUtils.TokenType.REFRESH)){
-            throw new InvalidInputException("Invalid refresh token"){};
+    public UserAuthenticationResult refresh(String refreshToken) throws AuthenticationException {
+        if (!jwtUtils.verifyJwtToken(refreshToken, JwtUtils.TokenType.REFRESH)) {
+            throw new InvalidInputException("Invalid refresh token") {
+            };
         }
         String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
         return new UserAuthenticationResult(

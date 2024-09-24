@@ -1,6 +1,7 @@
 package com.example.myapp.service;
 
 import com.example.myapp.entity.UserEntity;
+import com.example.myapp.model.Role;
 import com.example.myapp.model.RoleEnum;
 import com.example.myapp.model.User;
 import com.example.myapp.repository.UserRepository;
@@ -40,12 +41,22 @@ public class UserService {
         return userRepository.findByUsername(username).isPresent();
     }
 
+    public Optional<User> tryFinalizeUser(String username, String password, RoleEnum role) {
+        return getUser().flatMap(user ->
+            userRepository.findByUsername(user.getUsername()).map(userEntity -> {
+                userEntity.setUsername(username);
+                userEntity.setPassword(password);
+                roleService.putRole(userEntity, role);
+                return userMapper.toUser(userRepository.save(userEntity));
+            })
+        );
+    }
+
     public Optional<User> createUser(String username, String password, RoleEnum role) {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(username);
         userEntity.setPassword(password);
         roleService.putRole(userEntity, role);
-
         return Optional.of(userRepository.save(userEntity))
                 .map(userMapper::toUser);
     }
