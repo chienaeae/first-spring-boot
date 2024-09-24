@@ -51,7 +51,7 @@ public class RoleService {
     public void putRole(UserEntity userEntity, RoleEnum role) {
         RoleEntity roleEntity = Optional.ofNullable(roles.get(role))
                 .map(roleMapper::toEntity)
-                .orElseThrow(() -> new InternalException("Role not found", String.format("Role: %s has not been created at startup", role.getName())));
+                .orElseThrow(() -> new InternalException(String.format("Role: %s has not been created at startup", role.getName())));
         userEntity.setRole(roleEntity);
     }
 }

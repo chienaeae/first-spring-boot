@@ -17,18 +17,28 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class TodoService {
-    @Autowired
+
+
     private TodoRepository todoRepository;
 
-    @Autowired
     private TodoMapper todoMapper;
 
+    private FolderService folderService;
+
+    @Autowired
+    public TodoService(TodoRepository todoRepository, TodoMapper todoMapper, FolderService folderService) {
+        this.todoRepository = todoRepository;
+        this.todoMapper = todoMapper;
+        this.folderService = folderService;
+    }
+
     public Optional<Todo> createTodo(TodoCreate body) {
-        TodoEntity todoEntity = new TodoEntity(body.title(), body.description());
-        todoEntity.setTitle(body.title());
-        todoEntity.setDescription(body.description());
+        TodoEntity todo = new TodoEntity(body.title(), body.description());
+        todo.setTitle(body.title());
+        todo.setDescription(body.description());
+        folderService.putParentFolder(todo, body.parentId());
         return Optional
-                .of(todoRepository.save(todoEntity))
+                .of(todoRepository.save(todo))
                 .map(entity -> todoMapper.toTodo(entity));
     }
 

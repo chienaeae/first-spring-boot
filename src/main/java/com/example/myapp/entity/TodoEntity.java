@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -25,6 +24,10 @@ public class TodoEntity {
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private FolderEntity parentFolder;
 
     protected TodoEntity() {}
 

@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface TodoRepository extends CrudRepository<TodoEntity, Long> {
     List<TodoEntity> findByTitle(String title);
     Optional<TodoEntity> findById(long id);
+
+    List<TodoEntity> findByParentFolderId(Long parentFolderId);
 }

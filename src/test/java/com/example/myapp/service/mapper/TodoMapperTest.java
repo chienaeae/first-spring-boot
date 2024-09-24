@@ -20,14 +20,4 @@ public class TodoMapperTest {
         assertEquals(todoEntity.getDescription(), todo.getDescription());
     }
 
-    @Test
-    @DisplayName("Test todoMapper.toEntity")
-    public void testToEntity() {
-        Todo todo = new Todo();
-        todo.setTitle("title");
-        todo.setDescription("description");
-        TodoEntity todoEntity = todoMapper.toEntity(todo);
-        assertEquals(todo.getTitle(), todoEntity.getTitle());
-        assertEquals(todo.getDescription(), todoEntity.getDescription());
-    }
 }

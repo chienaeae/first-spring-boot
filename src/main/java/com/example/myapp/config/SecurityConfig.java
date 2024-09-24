@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority(RoleEnum.ADMIN.getName())
                         .requestMatchers("/todo/**").hasAnyAuthority(RoleEnum.USER.getName(), RoleEnum.USER_GUEST.getName())
+                        .requestMatchers("/folder/**").hasAnyAuthority(RoleEnum.USER.getName(), RoleEnum.USER_GUEST.getName())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

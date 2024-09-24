@@ -5,28 +5,32 @@ import com.example.myapp.model.Todo;
 import com.example.myapp.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/todo")
 public class TodoController {
 
+    private final TodoService todoService;
+
     @Autowired
-    private TodoService todoService;
+    public TodoController(TodoService todoService) {
+        this.todoService = todoService;
+    }
 
     @PostMapping("")
-    public @ResponseBody ResponseEntity<Todo> addTodo(@RequestBody TodoCreate body) {
+    public ResponseEntity<Todo> addTodo(@RequestBody @Validated TodoCreate body) {
         Optional<Todo> todo = todoService.createTodo(body);
         return todo.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @GetMapping("")
-    public @ResponseBody ResponseEntity<List<Todo>> getAllTodos() {
+    public ResponseEntity<List<Todo>> getAllTodos() {
         return ResponseEntity.ok(todoService.getTodos());
     }
 }
