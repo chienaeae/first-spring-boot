@@ -4,15 +4,9 @@ import com.example.myapp.dto.UserAuthenticationResult;
 import com.example.myapp.dto.request.AuthLogin;
 import com.example.myapp.dto.request.AuthRefresh;
 import com.example.myapp.dto.request.AuthSignup;
-import com.example.myapp.model.UserProfile;
 import com.example.myapp.service.AuthService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -27,6 +21,12 @@ public class AuthController {
     @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @PostMapping("/guest")
+    public ResponseEntity<UserAuthenticationResult> guest() {
+        UserAuthenticationResult userAuthenticationResult = authService.signupGuest();
+        return ResponseEntity.ok(userAuthenticationResult);
     }
 
     @PostMapping("/signup")

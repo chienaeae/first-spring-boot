@@ -3,6 +3,7 @@ package com.example.myapp.service;
 import com.example.myapp.dto.request.AuthLogin;
 import com.example.myapp.dto.request.AuthSignup;
 import com.example.myapp.dto.UserAuthenticationResult;
+import com.example.myapp.exception.InternalException;
 import com.example.myapp.exception.InvalidInputException;
 import com.example.myapp.model.RoleEnum;
 import com.example.myapp.model.UserProfile;
@@ -34,6 +35,18 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+    }
+
+    public UserAuthenticationResult signupGuest() {
+        Optional<UserProfile> newGuest = userService.createGuest();
+        if(newGuest.isEmpty()) {
+            throw new InternalException("Failed to create guest"){};
+        }
+        String username = newGuest.get().getUsername();
+        return new UserAuthenticationResult(
+                username,
+                jwtUtils.generateJwtAccessToken(username),
+                jwtUtils.generateJwtRefreshToken(username));
     }
 
     public Optional<String> signup(AuthSignup authSignup) throws IllegalArgumentException{

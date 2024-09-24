@@ -19,7 +19,7 @@ public class RoleInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         roleService.createRoleIfNotExists(RoleEnum.USER);
-        roleService.createRoleIfNotExists(RoleEnum.TEMPORARY_USER);
+        roleService.createRoleIfNotExists(RoleEnum.USER_GUEST);
         roleService.createRoleIfNotExists(RoleEnum.ADMIN);
         roleService.createRoleIfNotExists(RoleEnum.SUPER_ADMIN);
         roleService.loadRoles();

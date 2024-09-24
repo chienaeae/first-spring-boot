@@ -7,7 +7,7 @@ import lombok.Setter;
 public enum RoleEnum {
     // Note: Enum key and value should be the same
     USER("USER"),
-    TEMPORARY_USER("TEMPORARY_USER"),
+    USER_GUEST("USER_GUEST"),
     ADMIN("ADMIN"),
     SUPER_ADMIN("SUPER_ADMIN");
 
