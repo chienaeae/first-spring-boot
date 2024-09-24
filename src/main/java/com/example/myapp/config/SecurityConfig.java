@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority(RoleEnum.ADMIN.getName())
-                        .requestMatchers("/todo/**").hasAuthority(RoleEnum.USER.getName())
+                        .requestMatchers("/todo/**").hasAnyAuthority(RoleEnum.USER.getName(), RoleEnum.USER_GUEST.getName())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

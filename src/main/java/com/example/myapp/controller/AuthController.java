@@ -30,15 +30,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody @Validated AuthSignup body) {
-        Optional<String> usernameOrNull = authService.signup(body);
-        return usernameOrNull.<ResponseEntity<Void>>map(username -> ResponseEntity.created(
-                        ServletUriComponentsBuilder
-                                .fromCurrentRequestUri()
-                                .path("/{username}")
-                                .buildAndExpand(username)
-                                .toUri()).build())
-                .orElseGet(() -> ResponseEntity.internalServerError().build());
+    public ResponseEntity<UserAuthenticationResult> signup(@RequestBody @Validated AuthSignup body) {
+        UserAuthenticationResult userAuthenticationResult = authService.signup(body);
+        return ResponseEntity.ok(userAuthenticationResult);
     }
 
     @PostMapping("/login")

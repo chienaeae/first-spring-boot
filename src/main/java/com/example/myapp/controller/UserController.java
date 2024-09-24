@@ -1,7 +1,6 @@
 package com.example.myapp.controller;
 
-import com.example.myapp.model.UserProfile;
-import com.example.myapp.service.AuthService;
+import com.example.myapp.model.User;
 import com.example.myapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +21,9 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserProfile> me() {
-        Optional<UserProfile> userProfile = userService.getUserProfile();
-        return userProfile
+    public ResponseEntity<User> me() {
+        Optional<User> user = userService.getUser();
+        return user
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

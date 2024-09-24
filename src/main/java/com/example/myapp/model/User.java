@@ -5,15 +5,15 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UserProfile {
+public class User {
     private Long id;
     private String username;
     private RoleEnum role;
 
-    public UserProfile() {
+    public User() {
     }
 
-    public UserProfile(Long id, String username) {
+    public User(Long id, String username) {
         this.id = id;
         this.username = username;
     }

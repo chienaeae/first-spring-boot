@@ -6,7 +6,7 @@ import com.example.myapp.dto.UserAuthenticationResult;
 import com.example.myapp.exception.InternalException;
 import com.example.myapp.exception.InvalidInputException;
 import com.example.myapp.model.RoleEnum;
-import com.example.myapp.model.UserProfile;
+import com.example.myapp.model.User;
 import com.example.myapp.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,7 +38,7 @@ public class AuthService {
     }
 
     public UserAuthenticationResult signupGuest() {
-        Optional<UserProfile> newGuest = userService.createGuest();
+        Optional<User> newGuest = userService.createGuest();
         if(newGuest.isEmpty()) {
             throw new InternalException("Failed to create guest"){};
         }
@@ -49,21 +49,25 @@ public class AuthService {
                 jwtUtils.generateJwtRefreshToken(username));
     }
 
-    public Optional<String> signup(AuthSignup authSignup) throws IllegalArgumentException{
+    public UserAuthenticationResult signup(AuthSignup authSignup) throws InvalidInputException{
         boolean isUserExists = userService.checkIfUserExists(authSignup.username());
         if(isUserExists) {
             throw new InvalidInputException("Username is already taken"){};
         }
 
-        Optional<UserProfile> newUser = userService.createUser(
+        Optional<User> newUser = userService.createUser(
                 authSignup.username(),
                 passwordEncoder.encode(authSignup.password()),
                 RoleEnum.USER);
 
         if(newUser.isEmpty()) {
-            throw new InvalidInputException("Failed to create user"){};
+            throw new InternalException("Failed to create user"){};
         }
-        return newUser.map(UserProfile::getUsername);
+        String username = newUser.get().getUsername();
+        return new UserAuthenticationResult(
+                username,
+                jwtUtils.generateJwtAccessToken(username),
+                jwtUtils.generateJwtRefreshToken(username));
     }
 
     public UserAuthenticationResult authenticate(AuthLogin authLogin) throws IllegalArgumentException {

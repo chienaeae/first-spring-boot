@@ -2,7 +2,7 @@ package com.example.myapp.service;
 
 import com.example.myapp.entity.UserEntity;
 import com.example.myapp.model.RoleEnum;
-import com.example.myapp.model.UserProfile;
+import com.example.myapp.model.User;
 import com.example.myapp.repository.UserRepository;
 import com.example.myapp.service.mapper.UserMapper;
 import com.example.myapp.util.Base62IDGenerator;
@@ -29,28 +29,28 @@ public class UserService {
         this.base62IDGenerator = base62IDGenerator;
     }
 
-    public Optional<UserProfile> getUserProfile() throws AuthenticationException {
+    public Optional<User> getUser() throws AuthenticationException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         return userRepository.findByUsername(username)
-                .map(userMapper::toUserProfile);
+                .map(userMapper::toUser);
     }
 
     public boolean checkIfUserExists(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public Optional<UserProfile> createUser(String username, String password, RoleEnum role) {
+    public Optional<User> createUser(String username, String password, RoleEnum role) {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(username);
         userEntity.setPassword(password);
         roleService.putRole(userEntity, role);
 
         return Optional.of(userRepository.save(userEntity))
-                .map(userMapper::toUserProfile);
+                .map(userMapper::toUser);
     }
 
-    public Optional<UserProfile> createGuest() {
+    public Optional<User> createGuest() {
         UserEntity userEntity = new UserEntity();
         String username = base62IDGenerator.generateID();
         userEntity.setUsername(username);
@@ -58,6 +58,6 @@ public class UserService {
         roleService.putRole(userEntity, RoleEnum.USER_GUEST);
 
         return Optional.of(userRepository.save(userEntity))
-                .map(userMapper::toUserProfile);
+                .map(userMapper::toUser);
     }
 }
