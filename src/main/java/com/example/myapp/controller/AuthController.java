@@ -1,6 +1,6 @@
 package com.example.myapp.controller;
 
-import com.example.myapp.dto.UserAuthenticationResult;
+import com.example.myapp.dto.response.UserAuthenticationResponse;
 import com.example.myapp.dto.request.AuthLogin;
 import com.example.myapp.dto.request.AuthRefresh;
 import com.example.myapp.dto.request.AuthSignup;
@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,26 +21,26 @@ public class AuthController {
     }
 
     @PostMapping("/guest")
-    public ResponseEntity<UserAuthenticationResult> guest() {
-        UserAuthenticationResult userAuthenticationResult = authService.signupGuest();
+    public ResponseEntity<UserAuthenticationResponse> guest() {
+        UserAuthenticationResponse userAuthenticationResult = authService.signupGuest();
         return ResponseEntity.ok(userAuthenticationResult);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserAuthenticationResult> signup(@RequestBody @Validated AuthSignup body) {
-        UserAuthenticationResult userAuthenticationResult = authService.signup(body);
+    public ResponseEntity<UserAuthenticationResponse> signup(@RequestBody @Validated AuthSignup body) {
+        UserAuthenticationResponse userAuthenticationResult = authService.signup(body);
         return ResponseEntity.ok(userAuthenticationResult);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserAuthenticationResult> login(@RequestBody @Validated AuthLogin body) {
-        UserAuthenticationResult userAuthenticationResult = authService.authenticate(body);
+    public ResponseEntity<UserAuthenticationResponse> login(@RequestBody @Validated AuthLogin body) {
+        UserAuthenticationResponse userAuthenticationResult = authService.authenticate(body);
         return ResponseEntity.ok(userAuthenticationResult);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<UserAuthenticationResult> refresh(@RequestBody @Validated AuthRefresh body) {
-        UserAuthenticationResult userAuthenticationResult = authService.refresh(body.refreshToken());
+    public ResponseEntity<UserAuthenticationResponse> refresh(@RequestBody @Validated AuthRefresh body) {
+        UserAuthenticationResponse userAuthenticationResult = authService.refresh(body.refreshToken());
         return ResponseEntity.ok(userAuthenticationResult);
     }
 

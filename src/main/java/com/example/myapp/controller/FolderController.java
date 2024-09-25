@@ -1,14 +1,14 @@
 package com.example.myapp.controller;
 
 import com.example.myapp.dto.request.FolderCreate;
-import com.example.myapp.exception.InternalException;
-import com.example.myapp.model.Folder;
+import com.example.myapp.dto.response.FolderSimple;
+import com.example.myapp.dto.response.FolderWithChildren;
 import com.example.myapp.service.FolderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/folder")
@@ -21,15 +21,17 @@ public class FolderController {
     }
 
     @PostMapping("")
-    public @ResponseBody ResponseEntity<Folder> addFolder(@RequestBody @Validated FolderCreate body) {
-        Optional<Folder> newFolder =  folderService.createFolder(body);
-        if(newFolder.isPresent()) {
-            Folder folder = newFolder.get();
-            folder.setSubFolders(null);
-            folder.setSubTodos(null);
-            return ResponseEntity.ok(folder);
-        } else {
-            throw new InternalException("Failed to create folder");
-        }
+    public ResponseEntity<FolderSimple> addFolder(@RequestBody @Validated FolderCreate body) {
+        return ResponseEntity.ok(folderService.createFolder(body));
+    }
+
+    @GetMapping("/root")
+    public ResponseEntity<List<FolderSimple>> getRootFolders() {
+        return ResponseEntity.ok(folderService.getRootFolder());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FolderWithChildren> getFolder(@PathVariable Long id) {
+        return ResponseEntity.ok(folderService.getFolderWithChildren(id));
     }
 }

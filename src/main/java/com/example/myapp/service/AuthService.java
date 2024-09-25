@@ -2,7 +2,7 @@ package com.example.myapp.service;
 
 import com.example.myapp.dto.request.AuthLogin;
 import com.example.myapp.dto.request.AuthSignup;
-import com.example.myapp.dto.UserAuthenticationResult;
+import com.example.myapp.dto.response.UserAuthenticationResponse;
 import com.example.myapp.exception.InternalException;
 import com.example.myapp.exception.InvalidInputException;
 import com.example.myapp.model.RoleEnum;
@@ -13,7 +13,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,20 +37,20 @@ public class AuthService {
         this.jwtUtils = jwtUtils;
     }
 
-    public UserAuthenticationResult signupGuest() {
+    public UserAuthenticationResponse signupGuest() {
         Optional<User> newGuest = userService.createGuest();
         if (newGuest.isEmpty()) {
             throw new InternalException("Failed to create guest") {
             };
         }
         String username = newGuest.get().getUsername();
-        return new UserAuthenticationResult(
+        return new UserAuthenticationResponse(
                 username,
                 jwtUtils.generateJwtAccessToken(username),
                 jwtUtils.generateJwtRefreshToken(username));
     }
 
-    public UserAuthenticationResult signup(AuthSignup authSignup) throws InvalidInputException {
+    public UserAuthenticationResponse signup(AuthSignup authSignup) throws InvalidInputException {
         boolean isUserExists = userService.checkIfUserExists(authSignup.username());
         if (isUserExists) {
             throw new InvalidInputException("Username is already taken") {
@@ -65,19 +64,19 @@ public class AuthService {
                 .orElseThrow(() -> new InternalException("Failed to create user"));
 
         String username = newUser.getUsername();
-        return new UserAuthenticationResult(
+        return new UserAuthenticationResponse(
                 username,
                 jwtUtils.generateJwtAccessToken(username),
                 jwtUtils.generateJwtRefreshToken(username));
     }
 
-    public UserAuthenticationResult authenticate(AuthLogin authLogin) throws IllegalArgumentException {
+    public UserAuthenticationResponse authenticate(AuthLogin authLogin) throws IllegalArgumentException {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authLogin.username(), authLogin.password())
             );
             String username = authentication.getName();
-            return new UserAuthenticationResult(
+            return new UserAuthenticationResponse(
                     username,
                     jwtUtils.generateJwtAccessToken(username),
                     jwtUtils.generateJwtRefreshToken(username));
@@ -87,13 +86,13 @@ public class AuthService {
         }
     }
 
-    public UserAuthenticationResult refresh(String refreshToken) throws AuthenticationException {
+    public UserAuthenticationResponse refresh(String refreshToken) throws AuthenticationException {
         if (!jwtUtils.verifyJwtToken(refreshToken, JwtUtils.TokenType.REFRESH)) {
             throw new InvalidInputException("Invalid refresh token") {
             };
         }
         String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
-        return new UserAuthenticationResult(
+        return new UserAuthenticationResponse(
                 username,
                 jwtUtils.generateJwtAccessToken(username),
                 jwtUtils.generateJwtRefreshToken(username));

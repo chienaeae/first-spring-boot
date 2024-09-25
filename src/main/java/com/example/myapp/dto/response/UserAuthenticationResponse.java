@@ -1,7 +1,7 @@
-package com.example.myapp.dto;
+package com.example.myapp.dto.response;
 
 
-public record UserAuthenticationResult(
+public record UserAuthenticationResponse(
         String username,
         String accessToken,
         String refreshToken) {
