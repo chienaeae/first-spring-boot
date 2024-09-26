@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public interface FolderRepository extends CrudRepository<FolderEntity, Long> {
     List<FolderEntity> findByName(String name);
-    Optional<FolderEntity> findById(long id);
+    Optional<FolderEntity> findByIdAndUserId(long id, long userId);
 
     List<FolderEntity> findByParentFolderId(Long parentFolderId);
 
-    @Query("SELECT f FROM FolderEntity f WHERE f.parentFolder IS NULL")
-    List<FolderEntity> findRootFolders();
+    @Query("SELECT f FROM FolderEntity f WHERE f.parentFolder IS NULL AND f.user.id = ?1")
+    List<FolderEntity> findRootFoldersByUserId(Long userId);
 }

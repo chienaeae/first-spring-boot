@@ -13,6 +13,7 @@ public class Folder {
     private Long id;
     private String name;
     private LocalDateTime createdAt;
+    private Long userId;
 
     private List<Todo> subTodos = new ArrayList<>();
 

@@ -12,6 +12,7 @@ public class Todo {
     private String title;
     private String description;
     private LocalDateTime createdAt;
+    private Long userId;
 
     public Todo() {
     }

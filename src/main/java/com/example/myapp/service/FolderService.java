@@ -5,25 +5,29 @@ import com.example.myapp.dto.response.FolderSimple;
 import com.example.myapp.dto.response.FolderWithChildren;
 import com.example.myapp.entity.FolderEntity;
 import com.example.myapp.entity.TodoEntity;
+import com.example.myapp.entity.UserEntity;
 import com.example.myapp.exception.CustomNotFoundException;
 import com.example.myapp.exception.InvalidInputException;
-import com.example.myapp.service.mapper.FolderMapper;
-import com.example.myapp.service.mapper.TodoMapper;
+import com.example.myapp.service.mapper.FolderAndTodoMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.example.myapp.repository.FolderRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class FolderService {
     private final FolderRepository folderRepository;
-    private final FolderMapper folderMapper;
+    private final FolderAndTodoMapper folderMapper;
 
-    public FolderService(FolderRepository folderRepository, FolderMapper folderMapper) {
+    private final UserService userService;
+
+    public FolderService(FolderRepository folderRepository, FolderAndTodoMapper folderMapper, UserService userService) {
         this.folderRepository = folderRepository;
         this.folderMapper = folderMapper;
+        this.userService = userService;
     }
 
     public void putParentFolder(TodoEntity todo, Long parentId) {
@@ -38,31 +42,32 @@ public class FolderService {
         folder.setParentFolder(parentFolder);
     }
 
-    public FolderSimple createFolder(FolderCreate body) {
+    public FolderSimple createFolder(Long userId, FolderCreate body) {
         FolderEntity folder = new FolderEntity(body.name());
+        folder.setUser(new UserEntity(userId));
         if(body.parentId() != null) {
             putParentFolder(folder, body.parentId());
         }
         folderRepository.save(folder);
-        return folderMapper.toSimpleResponse(folder);
+        return folderMapper.toFolderSimpleResponse(folder);
     }
 
-    public List<FolderSimple> getRootFolder() {
-        return folderRepository.findRootFolders()
+    public List<FolderSimple> getRootFolder(Long userId) {
+        return folderRepository.findRootFoldersByUserId(userId)
                 .stream()
                 .map(folderMapper::toFolder)
-                .map(folderMapper::toSimpleResponse)
+                .map(folderMapper::toFolderSimpleResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public FolderWithChildren getFolderWithChildren(Long id) {
-        return folderRepository.findById(id)
+    public Optional<FolderWithChildren> getFolderWithChildren(Long userId, Long id) {
+        return folderRepository.findByIdAndUserId(id, userId)
                 .map((folderEntity) -> {
                     // lazy loading children
                     folderEntity.setSubFolders(folderEntity.getSubFolders());
                     folderEntity.setSubTodos(folderEntity.getSubTodos());
-                    return folderMapper.toDetailResponse(folderEntity);
-                }).orElseThrow(() -> new CustomNotFoundException("Folder not found"));
+                    return folderMapper.toFolderDetailResponse(folderEntity);
+                });
     }
 }

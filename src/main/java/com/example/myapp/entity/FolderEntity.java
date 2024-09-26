@@ -35,6 +35,10 @@ public class FolderEntity {
     @JoinColumn(name = "parent_id")
     private FolderEntity parentFolder;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     protected FolderEntity() {}
 
     public FolderEntity(String name) {

@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -57,9 +58,10 @@ public class AuthService {
             };
         }
 
+        String guestUsername = getUsername();
         String encodedPassword = passwordEncoder.encode(authSignup.password());
         User newUser = userService
-                .tryFinalizeUser(authSignup.username(), encodedPassword, RoleEnum.USER)
+                .tryFinalizeUser(guestUsername, authSignup.username(), encodedPassword, RoleEnum.USER)
                 .or(() -> userService.createUser(authSignup.username(), encodedPassword, RoleEnum.USER))
                 .orElseThrow(() -> new InternalException("Failed to create user"));
 
@@ -96,6 +98,11 @@ public class AuthService {
                 username,
                 jwtUtils.generateJwtAccessToken(username),
                 jwtUtils.generateJwtRefreshToken(username));
+    }
+
+    public String getUsername() throws AuthenticationException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
 }

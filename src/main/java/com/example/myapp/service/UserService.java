@@ -1,16 +1,12 @@
 package com.example.myapp.service;
 
 import com.example.myapp.entity.UserEntity;
-import com.example.myapp.model.Role;
 import com.example.myapp.model.RoleEnum;
 import com.example.myapp.model.User;
 import com.example.myapp.repository.UserRepository;
 import com.example.myapp.service.mapper.UserMapper;
 import com.example.myapp.util.Base62IDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,9 +26,7 @@ public class UserService {
         this.base62IDGenerator = base62IDGenerator;
     }
 
-    public Optional<User> getUser() throws AuthenticationException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+    public Optional<User> getUser(String username) {
         return userRepository.findByUsername(username)
                 .map(userMapper::toUser);
     }
@@ -41,8 +35,8 @@ public class UserService {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public Optional<User> tryFinalizeUser(String username, String password, RoleEnum role) {
-        return getUser().flatMap(user ->
+    public Optional<User> tryFinalizeUser(String originalUsername, String username, String password, RoleEnum role) {
+        return getUser(originalUsername).flatMap(user ->
             userRepository.findByUsername(user.getUsername()).map(userEntity -> {
                 userEntity.setUsername(username);
                 userEntity.setPassword(password);

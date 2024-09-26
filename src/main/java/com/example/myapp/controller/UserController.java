@@ -1,6 +1,8 @@
 package com.example.myapp.controller;
 
+import com.example.myapp.exception.CustomNotFoundException;
 import com.example.myapp.model.User;
+import com.example.myapp.service.AuthService;
 import com.example.myapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,18 +15,21 @@ import java.util.Optional;
 @RestController()
 @RequestMapping("/user")
 public class UserController {
+    private final AuthService authService;
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(AuthService authService, UserService userService) {
+        this.authService = authService;
         this.userService = userService;
     }
 
     @GetMapping("/me")
     public ResponseEntity<User> me() {
-        Optional<User> user = userService.getUser();
+        String username = authService.getUsername();
+        Optional<User> user = userService.getUser(username);
         return user
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new CustomNotFoundException("User not found"));
     }
 }
