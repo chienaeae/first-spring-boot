@@ -7,7 +7,6 @@ import com.example.myapp.model.RoleEnum;
 import com.example.myapp.model.Role;
 import com.example.myapp.repository.RoleRepository;
 import com.example.myapp.service.mapper.RoleMapper;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

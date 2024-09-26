@@ -4,11 +4,10 @@ import com.example.myapp.dto.CurrentUser;
 import com.example.myapp.dto.request.FolderCreate;
 import com.example.myapp.dto.response.FolderSimple;
 import com.example.myapp.dto.response.FolderWithChildren;
+import com.example.myapp.exception.BadException;
 import com.example.myapp.exception.CustomNotFoundException;
-import com.example.myapp.model.User;
 import com.example.myapp.service.AuthService;
 import com.example.myapp.service.FolderService;
-import com.example.myapp.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +19,10 @@ import java.util.List;
 public class FolderController {
 
     private final AuthService authService;
-    private final UserService userService;
     private final FolderService folderService;
 
-    public FolderController(AuthService authService, UserService userService, FolderService folderService) {
+    public FolderController(AuthService authService, FolderService folderService) {
         this.authService = authService;
-        this.userService = userService;
         this.folderService = folderService;
     }
 
@@ -33,7 +30,9 @@ public class FolderController {
     public ResponseEntity<FolderSimple> addFolder(@RequestBody @Validated FolderCreate body) {
         CurrentUser currentUser = authService.getCurrentUser();
 
-        return ResponseEntity.ok(folderService.createFolder(currentUser.userId(), body));
+        return folderService.createFolder(currentUser.userId(), body)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new CustomNotFoundException("Failed to create folder"));
     }
 
     @GetMapping("/root")
@@ -48,7 +47,7 @@ public class FolderController {
         CurrentUser currentUser = authService.getCurrentUser();
 
         FolderWithChildren folder = folderService.getFolderWithChildren(currentUser.userId(), id)
-                .orElseThrow(() -> new CustomNotFoundException("Folder not found"));
+                .orElseThrow(() -> new BadException("Folder not found"));
 
         return ResponseEntity.ok(folder);
     }

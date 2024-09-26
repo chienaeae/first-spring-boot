@@ -14,11 +14,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidInputException(InvalidInputException exception) {
-        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.UNAUTHORIZED);
@@ -27,6 +22,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InternalException.class)
     public ResponseEntity<ErrorResponse> handleInternalException(InternalException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(BadException.class)
+    public ResponseEntity<ErrorResponse> handleBadException(BadException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode(), exception.getMessage(), null), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

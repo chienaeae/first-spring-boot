@@ -4,8 +4,8 @@ import com.example.myapp.dto.CurrentUser;
 import com.example.myapp.dto.request.AuthLogin;
 import com.example.myapp.dto.request.AuthSignup;
 import com.example.myapp.dto.response.UserAuthenticationResponse;
+import com.example.myapp.exception.BadException;
 import com.example.myapp.exception.InternalException;
-import com.example.myapp.exception.InvalidInputException;
 import com.example.myapp.model.RoleEnum;
 import com.example.myapp.model.User;
 import com.example.myapp.security.CustomUserDetails;
@@ -53,10 +53,10 @@ public class AuthService {
                 jwtUtils.generateJwtRefreshToken(username));
     }
 
-    public UserAuthenticationResponse signup(AuthSignup authSignup) throws InvalidInputException {
+    public UserAuthenticationResponse signup(AuthSignup authSignup) throws BadException {
         boolean isUserExists = userService.checkIfUserExists(authSignup.username());
         if (isUserExists) {
-            throw new InvalidInputException("Username is already taken") {
+            throw new BadException("Username is already taken") {
             };
         }
 
@@ -86,14 +86,14 @@ public class AuthService {
                     jwtUtils.generateJwtAccessToken(username),
                     jwtUtils.generateJwtRefreshToken(username));
         } catch (AuthenticationException e) {
-            throw new InvalidInputException("Invalid username/password supplied") {
+            throw new BadException("Invalid username/password supplied") {
             };
         }
     }
 
     public UserAuthenticationResponse refresh(String refreshToken) throws AuthenticationException {
         if (!jwtUtils.verifyJwtToken(refreshToken, JwtUtils.TokenType.REFRESH)) {
-            throw new InvalidInputException("Invalid refresh token") {
+            throw new BadException("Invalid refresh token") {
             };
         }
         String username = jwtUtils.getUserNameFromJwtToken(refreshToken);

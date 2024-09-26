@@ -13,11 +13,11 @@ import java.util.Optional;
 
 @Service
 public class TodoService {
-    private TodoRepository todoRepository;
+    private final TodoRepository todoRepository;
 
-    private FolderService folderService;
+    private final FolderService folderService;
 
-    private FolderAndTodoMapper folderAndTodoMapper;
+    private final FolderAndTodoMapper folderAndTodoMapper;
 
     @Autowired
     public TodoService(TodoRepository todoRepository, FolderService folderService, FolderAndTodoMapper folderAndTodoMapper) {
@@ -34,6 +34,6 @@ public class TodoService {
         folderService.putParentFolder(todo, body.parentId());
         return Optional
                 .of(todoRepository.save(todo))
-                .map(entity -> folderAndTodoMapper.toTodo(entity));
+                .map(folderAndTodoMapper::toTodo);
     }
 }
