@@ -1,5 +1,6 @@
 package com.example.myapp.service;
 
+import com.example.myapp.dto.CurrentUser;
 import com.example.myapp.dto.request.AuthLogin;
 import com.example.myapp.dto.request.AuthSignup;
 import com.example.myapp.dto.response.UserAuthenticationResponse;
@@ -7,6 +8,7 @@ import com.example.myapp.exception.InternalException;
 import com.example.myapp.exception.InvalidInputException;
 import com.example.myapp.model.RoleEnum;
 import com.example.myapp.model.User;
+import com.example.myapp.security.CustomUserDetails;
 import com.example.myapp.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,10 +60,11 @@ public class AuthService {
             };
         }
 
-        String guestUsername = getUsername();
+        // Try to finalize the guest user to the new user if the guest user exists
+        CurrentUser guestUser = getCurrentUser();
         String encodedPassword = passwordEncoder.encode(authSignup.password());
         User newUser = userService
-                .tryFinalizeUser(guestUsername, authSignup.username(), encodedPassword, RoleEnum.USER)
+                .tryFinalizeUser(guestUser.username(), authSignup.username(), encodedPassword, RoleEnum.USER)
                 .or(() -> userService.createUser(authSignup.username(), encodedPassword, RoleEnum.USER))
                 .orElseThrow(() -> new InternalException("Failed to create user"));
 
@@ -100,9 +103,12 @@ public class AuthService {
                 jwtUtils.generateJwtRefreshToken(username));
     }
 
-    public String getUsername() throws AuthenticationException {
+    public CurrentUser getCurrentUser() throws AuthenticationException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
+        if(authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return new CurrentUser(userDetails.getUserId(), userDetails.getUsername());
+        }
+        return null;
     }
 
 }

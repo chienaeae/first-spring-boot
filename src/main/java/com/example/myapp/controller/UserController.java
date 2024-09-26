@@ -1,5 +1,6 @@
 package com.example.myapp.controller;
 
+import com.example.myapp.dto.CurrentUser;
 import com.example.myapp.exception.CustomNotFoundException;
 import com.example.myapp.model.User;
 import com.example.myapp.service.AuthService;
@@ -26,8 +27,8 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<User> me() {
-        String username = authService.getUsername();
-        Optional<User> user = userService.getUser(username);
+        CurrentUser currentUser = authService.getCurrentUser();
+        Optional<User> user = userService.getUser(currentUser.username());
         return user
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new CustomNotFoundException("User not found"));

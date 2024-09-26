@@ -1,5 +1,6 @@
 package com.example.myapp.controller;
 
+import com.example.myapp.dto.CurrentUser;
 import com.example.myapp.dto.request.FolderCreate;
 import com.example.myapp.dto.response.FolderSimple;
 import com.example.myapp.dto.response.FolderWithChildren;
@@ -30,32 +31,23 @@ public class FolderController {
 
     @PostMapping("")
     public ResponseEntity<FolderSimple> addFolder(@RequestBody @Validated FolderCreate body) {
-        String username = authService.getUsername();
+        CurrentUser currentUser = authService.getCurrentUser();
 
-        User user = userService.getUser(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return ResponseEntity.ok(folderService.createFolder(user.getId(), body));
+        return ResponseEntity.ok(folderService.createFolder(currentUser.userId(), body));
     }
 
     @GetMapping("/root")
     public ResponseEntity<List<FolderSimple>> getRootFolders() {
-        String username = authService.getUsername();
+        CurrentUser currentUser = authService.getCurrentUser();
 
-        User user = userService.getUser(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return ResponseEntity.ok(folderService.getRootFolder(user.getId()));
+        return ResponseEntity.ok(folderService.getRootFolder(currentUser.userId()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FolderWithChildren> getFolder(@PathVariable Long id) {
-        String username = authService.getUsername();
+        CurrentUser currentUser = authService.getCurrentUser();
 
-        User user = userService.getUser(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        FolderWithChildren folder = folderService.getFolderWithChildren(user.getId(), id)
+        FolderWithChildren folder = folderService.getFolderWithChildren(currentUser.userId(), id)
                 .orElseThrow(() -> new CustomNotFoundException("Folder not found"));
 
         return ResponseEntity.ok(folder);
